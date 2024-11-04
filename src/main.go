@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 
@@ -8,31 +9,76 @@ import (
 	"thanhfphan.com/bomberman/src/engine"
 )
 
+type Player struct {
+	x, y  float64
+	speed float64 // units per second
+}
+
+func NewPlayer() *Player {
+	return &Player{
+		x:     400,
+		y:     400,
+		speed: 500,
+	}
+}
+
 type Game struct {
-	renderState *engine.RenderState
+	render *engine.RenderState
+	time   *engine.TimeState
+	input  *engine.InputSate
+
+	player *Player
+}
+
+func (p *Player) Update(delta float64, input *engine.InputSate) {
+	if input.Left == engine.KeyStatePressed || input.Left == engine.KeyStateHeld {
+		p.x -= p.speed * delta
+	}
+	if input.Right == engine.KeyStatePressed || input.Right == engine.KeyStateHeld {
+		p.x += p.speed * delta
+	}
+	if input.Up == engine.KeyStatePressed || input.Up == engine.KeyStateHeld {
+		p.y -= p.speed * delta
+	}
+	if input.Down == engine.KeyStatePressed || input.Down == engine.KeyStateHeld {
+		p.y += p.speed * delta
+	}
 }
 
 func NewGame(w, h int) *Game {
 	return &Game{
-		renderState: engine.NewRenderState(w, h),
+		render: engine.NewRenderState(w, h),
+		time:   engine.NewTimeState(),
+		input:  engine.NewInputState(),
+		player: NewPlayer(),
 	}
 }
 
+func (g *Game) LoadConfig(file string) error {
+	if err := engine.LoadConfig(file); err != nil {
+		return fmt.Errorf("could not load config file: %v", err)
+	}
+	return nil
+}
+
 func (g *Game) Update() error {
-	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
+	if g.input.Escape == engine.KeyStatePressed {
 		return ebiten.Termination
 	}
+
+	g.time.Update()
+	g.input.Update()
+	g.player.Update(g.time.Delta(), g.input)
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.renderState.Begin(screen)
+	g.render.Begin(screen)
 
-	screenW, screenH := g.renderState.ScreenWidth(), g.renderState.ScreenHeight()
-	g.renderState.RenderQuad(screen, float32(screenW/2), float32(screenH/2), 100, 100, color.White)
+	g.render.RenderQuad(screen, float32(g.player.x), float32(g.player.y), 100, 100, color.White)
 
-	g.renderState.End(screen)
+	g.render.End(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -42,6 +88,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 func main() {
 	width, height := 640, 480
 	game := NewGame(width, height)
+	if err := game.LoadConfig("config.ini"); err != nil {
+		log.Fatalf("could not load config: %v", err)
+	}
 
 	ebiten.SetWindowTitle("Bomberman")
 	ebiten.SetWindowSize(width, height)
