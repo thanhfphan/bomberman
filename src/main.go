@@ -27,31 +27,30 @@ type Game struct {
 	time   *engine.TimeState
 	input  *engine.InputSate
 
-	player *Player
-}
-
-func (p *Player) Update(delta float64, input *engine.InputSate) {
-	if input.Left == engine.KeyStatePressed || input.Left == engine.KeyStateHeld {
-		p.x -= p.speed * delta
-	}
-	if input.Right == engine.KeyStatePressed || input.Right == engine.KeyStateHeld {
-		p.x += p.speed * delta
-	}
-	if input.Up == engine.KeyStatePressed || input.Up == engine.KeyStateHeld {
-		p.y -= p.speed * delta
-	}
-	if input.Down == engine.KeyStatePressed || input.Down == engine.KeyStateHeld {
-		p.y += p.speed * delta
-	}
+	entityManager *engine.EntityManager
+	player        *engine.Entity
 }
 
 func NewGame(w, h int) *Game {
 	return &Game{
-		render: engine.NewRenderState(w, h),
-		time:   engine.NewTimeState(),
-		input:  engine.NewInputState(),
-		player: NewPlayer(),
+		render:        engine.NewRenderState(w, h),
+		time:          engine.NewTimeState(),
+		input:         engine.NewInputState(),
+		entityManager: engine.NewEntityManager(),
 	}
+}
+
+func (g *Game) Setup() error {
+	player, err := g.entityManager.CreateEntity()
+	if err != nil {
+		return fmt.Errorf("could not create player entity: %v", err)
+	}
+	g.player = player
+
+	g.player.Body.AABB.Position.X = 300
+	g.player.Body.AABB.Position.Y = 200
+
+	return nil
 }
 
 func (g *Game) LoadConfig(file string) error {
@@ -61,6 +60,22 @@ func (g *Game) LoadConfig(file string) error {
 	return nil
 }
 
+func (g *Game) inputHandle(body *engine.Body) {
+	if g.input.Left == engine.KeyStatePressed || g.input.Left == engine.KeyStateHeld {
+		fmt.Println(body.AABB.Position.X, body.AABB.Position.Y)
+		body.AABB.Position.X -= 500 * g.time.Delta
+	}
+	if g.input.Right == engine.KeyStatePressed || g.input.Right == engine.KeyStateHeld {
+		body.AABB.Position.X += 500 * g.time.Delta
+	}
+	if g.input.Up == engine.KeyStatePressed || g.input.Up == engine.KeyStateHeld {
+		body.AABB.Position.Y -= 500 * g.time.Delta
+	}
+	if g.input.Down == engine.KeyStatePressed || g.input.Down == engine.KeyStateHeld {
+		body.AABB.Position.Y += 500 * g.time.Delta
+	}
+}
+
 func (g *Game) Update() error {
 	if g.input.Escape == engine.KeyStatePressed {
 		return ebiten.Termination
@@ -68,7 +83,7 @@ func (g *Game) Update() error {
 
 	g.time.Update()
 	g.input.Update()
-	g.player.Update(g.time.Delta(), g.input)
+	g.inputHandle(g.player.Body)
 
 	return nil
 }
@@ -76,18 +91,21 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.render.Begin(screen)
 
-	g.render.RenderQuad(screen, float32(g.player.x), float32(g.player.y), 100, 100, color.White)
+	g.render.RenderQuad(screen, float32(g.player.Body.AABB.Position.X), float32(g.player.Body.AABB.Position.Y), 100, 100, color.White)
 
 	g.render.End(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 640, 480
+	return 544, 480
 }
 
 func main() {
-	width, height := 640, 480
+	width, height := 1088, 960
 	game := NewGame(width, height)
+	if err := game.Setup(); err != nil {
+		log.Fatalf("could not setup game: %v", err)
+	}
 	if err := game.LoadConfig("config.ini"); err != nil {
 		log.Fatalf("could not load config: %v", err)
 	}

@@ -8,20 +8,12 @@ import (
 )
 
 type RenderState struct {
-	screenWidth  int
-	screenHeight int
+	ScreenWidth  int
+	ScreenHeight int
 }
 
 func NewRenderState(w, h int) *RenderState {
 	return &RenderState{w, h}
-}
-
-func (rs *RenderState) ScreenWidth() int {
-	return rs.screenWidth
-}
-
-func (rs *RenderState) ScreenHeight() int {
-	return rs.screenHeight
 }
 
 func (rs *RenderState) Begin(screen *ebiten.Image) {
