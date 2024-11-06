@@ -1,9 +1,5 @@
 package engine
 
-const (
-	MaxSize = 100_000_000
-)
-
 type StackInt struct {
 	items    []int
 	size     int
@@ -19,15 +15,11 @@ func NewStack(capacity int) *StackInt {
 		items:    make([]int, capacity),
 		size:     0,
 		capacity: capacity,
-		lookup:   NewBitSet(MaxSize),
+		lookup:   NewBitSet(),
 	}
 }
 
 func (s *StackInt) Push(item int) {
-	if s.size >= MaxSize {
-		panic("stack is full")
-	}
-
 	if s.size >= s.capacity {
 		s.capacity *= 2
 		newItems := make([]int, s.capacity)
