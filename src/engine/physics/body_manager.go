@@ -1,7 +1,11 @@
-package engine
+package physics
+
+import (
+	"thanhfphan.com/bomberman/src/engine/dt"
+)
 
 type BodyManager struct {
-	bodies *ArrayList[*Body]
+	bodies *dt.ArrayList[*Body]
 }
 
 func NewBodyManager(capacity int) *BodyManager {
@@ -9,12 +13,14 @@ func NewBodyManager(capacity int) *BodyManager {
 		capacity = 1
 	}
 	return &BodyManager{
-		bodies: NewArrayList[*Body](capacity),
+		bodies: dt.NewArrayList[*Body](capacity),
 	}
 }
 
 func (b *BodyManager) Create() (*Body, error) {
-	body := &Body{}
+	body := &Body{
+		IsActive: true,
+	}
 	id, err := b.bodies.Append(body)
 	if err != nil {
 		return nil, err
@@ -42,4 +48,25 @@ func (b *BodyManager) RemoveID(id int) error {
 
 func (b *BodyManager) Size() int {
 	return b.bodies.Size()
+}
+
+func (b *BodyManager) Update(deltaTime float64) {
+	for i := 0; i < b.bodies.Size(); i++ {
+		body, err := b.bodies.Get(i)
+		if err != nil {
+			continue
+		}
+		if !body.IsActive {
+			continue
+		}
+
+		body.Velocity.X += body.Acceleration.X
+		body.Velocity.Y += body.Acceleration.Y
+
+		body.Velocity.X *= deltaTime
+		body.Velocity.Y *= deltaTime
+
+		body.AABB.Position.X += body.Velocity.X
+		body.AABB.Position.Y += body.Velocity.Y
+	}
 }

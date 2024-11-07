@@ -46,18 +46,18 @@ func (g *Game) LoadConfig(file string) error {
 	return nil
 }
 
-func (g *Game) inputHandle(body *engine.Body) {
+func (g *Game) playerMoving() {
 	if g.input.Left == engine.KeyStatePressed || g.input.Left == engine.KeyStateHeld {
-		body.AABB.Position.X -= 500 * g.time.Delta
+		g.player.Body.Velocity.X -= engine.PlayerSpeed
 	}
 	if g.input.Right == engine.KeyStatePressed || g.input.Right == engine.KeyStateHeld {
-		body.AABB.Position.X += 500 * g.time.Delta
+		g.player.Body.Velocity.X += engine.PlayerSpeed
 	}
 	if g.input.Up == engine.KeyStatePressed || g.input.Up == engine.KeyStateHeld {
-		body.AABB.Position.Y -= 500 * g.time.Delta
+		g.player.Body.Velocity.Y -= engine.PlayerSpeed
 	}
 	if g.input.Down == engine.KeyStatePressed || g.input.Down == engine.KeyStateHeld {
-		body.AABB.Position.Y += 500 * g.time.Delta
+		g.player.Body.Velocity.Y += engine.PlayerSpeed
 	}
 }
 
@@ -68,7 +68,9 @@ func (g *Game) Update() error {
 
 	g.time.Update()
 	g.input.Update()
-	g.inputHandle(g.player.Body)
+	g.playerMoving()
+
+	g.entityManager.Update(g.time.Delta)
 
 	return nil
 }

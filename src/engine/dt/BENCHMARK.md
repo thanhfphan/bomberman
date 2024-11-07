@@ -1,5 +1,5 @@
 
-## ArrayList - Stack
+# ArrayList - Stack
 
 ```bash
 go test -bench=. array_lis*.go stack.go bitset.go

@@ -7,7 +7,10 @@ import (
 	"gopkg.in/ini.v1"
 )
 
-var KeyBindings map[InputKey]ebiten.Key
+var (
+	KeyBindings map[InputKey]ebiten.Key
+	PlayerSpeed float64
+)
 
 var KeyMap = map[string]ebiten.Key{
 	"A":      ebiten.KeyA,
@@ -31,6 +34,11 @@ func LoadConfig(file string) error {
 		InputKeyDown:      KeyMap[(cfg.Section("controls").Key("down").String())],
 		InputkeyPlaceBomb: KeyMap[(cfg.Section("controls").Key("place_bomb").String())],
 		InputKeyEscape:    KeyMap[(cfg.Section("controls").Key("escape").String())],
+	}
+
+	PlayerSpeed, err = cfg.Section("player").Key("speed").Float64()
+	if err != nil {
+		return fmt.Errorf("could not load player speed: %v", err)
 	}
 
 	return nil

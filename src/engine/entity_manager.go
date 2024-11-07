@@ -3,19 +3,22 @@ package engine
 import (
 	"fmt"
 	"log/slog"
+
+	"thanhfphan.com/bomberman/src/engine/dt"
+	"thanhfphan.com/bomberman/src/engine/physics"
 )
 
 type EntityManager struct {
-	entites    *ArrayList[*Entity]
-	bodyManger *BodyManager
+	entites    *dt.ArrayList[*Entity]
+	bodyManger *physics.BodyManager
 }
 
 func NewEntityManager() *EntityManager {
 	cap := 10
-	bm := NewBodyManager(cap)
+	bm := physics.NewBodyManager(cap)
 
 	return &EntityManager{
-		entites:    NewArrayList[*Entity](cap),
+		entites:    dt.NewArrayList[*Entity](cap),
 		bodyManger: bm,
 	}
 }
@@ -56,4 +59,8 @@ func (em *EntityManager) RemoveEntity(e *Entity) error {
 
 func (em *EntityManager) Size() int {
 	return em.entites.Size()
+}
+
+func (em *EntityManager) Update(deltaTime float64) {
+	em.bodyManger.Update(deltaTime)
 }

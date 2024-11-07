@@ -1,4 +1,4 @@
-package engine
+package dt
 
 type StackInt struct {
 	items    []int
