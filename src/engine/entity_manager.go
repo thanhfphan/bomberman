@@ -32,11 +32,7 @@ func (em *EntityManager) CreateEntity() (*Entity, error) {
 	entity := &Entity{
 		Body: body,
 	}
-	id, err := em.entites.Append(entity)
-	if err != nil {
-		return nil, err
-	}
-	entity.ID = id
+	entity.ID = em.entites.Append(entity)
 
 	return entity, nil
 }

@@ -44,9 +44,9 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration []float32, row []uint8, column []uint8, frameCount uint8) (int, error) {
+func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration []float32, row []uint8, column []uint8, frameCount uint8) int {
 	if frameCount > MaxFrame {
-		return -1, fmt.Errorf("frame count exceeds maximum frame count")
+		panic(fmt.Errorf("frame count exceeds maximum frame count"))
 	}
 
 	def := &Definition{
@@ -61,12 +61,7 @@ func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duratio
 		}
 	}
 
-	id, err := m.definitions.Append(def)
-	if err != nil {
-		return -1, fmt.Errorf("could not add definition: %v", err)
-	}
-
-	return id, nil
+	return m.definitions.Append(def)
 }
 
 func (m *Manager) CreateAnimation(definitionID int, doesLoop bool) (int, error) {
@@ -80,10 +75,8 @@ func (m *Manager) CreateAnimation(definitionID int, doesLoop bool) (int, error) 
 		IsActive:         true,
 		CurrentFrameTime: def.Frames[0].Duration,
 	}
-	id, err := m.animations.Append(animation)
-	if err != nil {
-		return -1, fmt.Errorf("could not add animation: %v", err)
-	}
+
+	id := m.animations.Append(animation)
 
 	return id, nil
 }

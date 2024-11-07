@@ -23,7 +23,7 @@ func NewArrayList[T any](capacity int) *ArrayList[T] {
 	}
 }
 
-func (list *ArrayList[T]) Append(item T) (int, error) {
+func (list *ArrayList[T]) Append(item T) int {
 	var index int
 	if list.freeList.Size() > 0 {
 		index, _ = list.freeList.Pop()
@@ -40,7 +40,7 @@ func (list *ArrayList[T]) Append(item T) (int, error) {
 	}
 
 	list.items[index] = item
-	return index, nil
+	return index
 }
 
 func (list *ArrayList[T]) Get(index int) (T, error) {

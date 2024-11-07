@@ -21,11 +21,7 @@ func (b *BodyManager) Create() (*Body, error) {
 	body := &Body{
 		IsActive: true,
 	}
-	id, err := b.bodies.Append(body)
-	if err != nil {
-		return nil, err
-	}
-	body.ID = id
+	body.ID = b.bodies.Append(body)
 
 	return body, nil
 }
