@@ -5,10 +5,9 @@ import (
 )
 
 type Body struct {
-	ID           int
-	AABB         AABB
-	Velocity     math.Vec2
-	Acceleration math.Vec2
+	ID       int
+	AABB     AABB
+	Velocity math.Vec2
 
 	IsActive bool
 }

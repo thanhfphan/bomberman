@@ -47,6 +47,8 @@ func (g *Game) LoadConfig(file string) error {
 }
 
 func (g *Game) playerMoving() {
+	g.player.Body.Velocity.X = 0
+	g.player.Body.Velocity.Y = 0
 	if g.input.Left == engine.KeyStatePressed || g.input.Left == engine.KeyStateHeld {
 		g.player.Body.Velocity.X -= engine.PlayerSpeed
 	}
