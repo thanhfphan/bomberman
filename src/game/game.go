@@ -2,41 +2,34 @@ package game
 
 import (
 	"fmt"
-	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"thanhfphan.com/bomberman/src/engine"
+	"thanhfphan.com/bomberman/src/engine/animation"
 )
 
 type Game struct {
-	render *engine.RenderState
-	time   *engine.TimeState
-	input  *engine.InputSate
+	render           *engine.RenderState
+	time             *engine.TimeState
+	input            *engine.InputSate
+	player           *engine.Entity
+	entityManager    *engine.EntityManager
+	animationManager *animation.Manager
 
-	entityManager *engine.EntityManager
-	player        *engine.Entity
+	animationIdleID      int
+	animationWalkRightID int
+	animationWalkBackID  int
+	animationWalkFrontID int
 }
 
 func New(w, h int) *Game {
 	return &Game{
-		render:        engine.NewRenderState(w, h),
-		time:          engine.NewTimeState(),
-		input:         engine.NewInputState(),
-		entityManager: engine.NewEntityManager(),
+		render:           engine.NewRenderState(w, h),
+		time:             engine.NewTimeState(),
+		input:            engine.NewInputState(),
+		entityManager:    engine.NewEntityManager(),
+		animationManager: animation.NewManager(),
 	}
-}
-
-func (g *Game) Setup() error {
-	player, err := g.entityManager.CreateEntity()
-	if err != nil {
-		return fmt.Errorf("could not create player entity: %v", err)
-	}
-	g.player = player
-
-	g.player.Body.AABB.Position.X = 300
-	g.player.Body.AABB.Position.Y = 200
-
-	return nil
 }
 
 func (g *Game) LoadConfig(file string) error {
@@ -68,10 +61,22 @@ func (g *Game) Update() error {
 		return ebiten.Termination
 	}
 
+	playerv := g.player.Body.Velocity
+	if playerv.Y < 0 {
+		g.player.AnimationID = g.animationWalkBackID
+	} else if playerv.Y > 0 {
+		g.player.AnimationID = g.animationWalkFrontID
+	} else if playerv.X != 0 {
+		g.player.AnimationID = g.animationWalkRightID // Walk left will be flipped
+	} else {
+		g.player.AnimationID = g.animationIdleID
+	}
+
 	g.time.Update()
 	g.input.Update()
 	g.playerMoving()
 
+	g.animationManager.Update(g.time.Delta)
 	g.entityManager.Update(g.time.Delta)
 
 	return nil
@@ -80,7 +85,35 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.render.Begin(screen)
 
-	g.render.RenderQuad(screen, float32(g.player.Body.AABB.Position.X), float32(g.player.Body.AABB.Position.Y), 100, 100, color.White)
+	// g.render.RenderQuad(screen, float32(g.player.Body.AABB.Position.X), float32(g.player.Body.AABB.Position.Y), 100, 100, color.White)
+	for i := 0; i < g.entityManager.Size(); i++ {
+		entity, err := g.entityManager.GetEntity(i)
+		if err != nil {
+			continue
+		}
+		if entity.AnimationID == -1 {
+			continue
+		}
+		animation, err := g.animationManager.GetAnimation(entity.AnimationID)
+		if err != nil {
+			continue
+		}
+		if !animation.IsActive {
+			continue
+		}
+
+		if entity.Body.Velocity.Y == 0 {
+			if entity.Body.Velocity.X < 0 {
+				animation.IsFlipped = true
+			} else if entity.Body.Velocity.X > 0 {
+				animation.IsFlipped = false
+			}
+		}
+
+		aframe := animation.Definition.Frames[animation.CurrentFrameIndex]
+
+		animation.Definition.SpriteSheet.DrawFrame(screen, float64(aframe.Row), float64(aframe.Column), entity.Body.AABB.Position, animation.IsFlipped)
+	}
 
 	g.render.End(screen)
 }
