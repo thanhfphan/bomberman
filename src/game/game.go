@@ -9,13 +9,26 @@ import (
 	"thanhfphan.com/bomberman/src/engine/audio"
 )
 
-type Game struct {
-	render           *engine.RenderState
+type GlobalState struct {
 	time             *engine.TimeState
 	input            *engine.InputSate
-	player           *engine.Entity
 	entityManager    *engine.EntityManager
 	animationManager *animation.Manager
+}
+
+var gs GlobalState
+
+func init() {
+	gs.time = engine.NewTimeState()
+	gs.input = engine.NewInputState()
+	gs.entityManager = engine.NewEntityManager()
+	gs.animationManager = animation.NewManager()
+}
+
+type Game struct {
+	render *engine.RenderState
+
+	player *Player
 
 	animationIdleID      int
 	animationWalkRightID int
@@ -28,11 +41,7 @@ type Game struct {
 
 func New(w, h int) *Game {
 	return &Game{
-		render:           engine.NewRenderState(w, h),
-		time:             engine.NewTimeState(),
-		input:            engine.NewInputState(),
-		entityManager:    engine.NewEntityManager(),
-		animationManager: animation.NewManager(),
+		render: engine.NewRenderState(w, h),
 	}
 }
 
@@ -46,26 +55,26 @@ func (g *Game) LoadConfig(file string) error {
 func (g *Game) handlePlayer() {
 	g.player.Body.Velocity.X = 0
 	g.player.Body.Velocity.Y = 0
-	if g.input.Left == engine.KeyStatePressed || g.input.Left == engine.KeyStateHeld {
+	if gs.input.Left == engine.KeyStatePressed || gs.input.Left == engine.KeyStateHeld {
 		g.player.Body.Velocity.X -= engine.PlayerSpeed
 	}
-	if g.input.Right == engine.KeyStatePressed || g.input.Right == engine.KeyStateHeld {
+	if gs.input.Right == engine.KeyStatePressed || gs.input.Right == engine.KeyStateHeld {
 		g.player.Body.Velocity.X += engine.PlayerSpeed
 	}
-	if g.input.Up == engine.KeyStatePressed || g.input.Up == engine.KeyStateHeld {
+	if gs.input.Up == engine.KeyStatePressed || gs.input.Up == engine.KeyStateHeld {
 		g.player.Body.Velocity.Y -= engine.PlayerSpeed
 	}
-	if g.input.Down == engine.KeyStatePressed || g.input.Down == engine.KeyStateHeld {
+	if gs.input.Down == engine.KeyStatePressed || gs.input.Down == engine.KeyStateHeld {
 		g.player.Body.Velocity.Y += engine.PlayerSpeed
 	}
 
-	if g.input.PlaceBomb == engine.KeyStatePressed {
+	if gs.input.PlaceBomb == engine.KeyStatePressed {
 		audio.Play(g.playBombSound)
 	}
 }
 
 func (g *Game) Update() error {
-	if g.input.Escape == engine.KeyStatePressed {
+	if gs.input.Escape == engine.KeyStatePressed {
 		return ebiten.Termination
 	}
 
@@ -80,12 +89,13 @@ func (g *Game) Update() error {
 		g.player.AnimationID = g.animationIdleID
 	}
 
-	g.time.Update()
-	g.input.Update()
+	gs.time.Update()
+	gs.input.Update()
+
 	g.handlePlayer()
 
-	g.animationManager.Update(g.time.Delta)
-	g.entityManager.Update(g.time.Delta)
+	gs.animationManager.Update(gs.time.Delta)
+	gs.entityManager.Update(gs.time.Delta)
 
 	return nil
 }
@@ -93,15 +103,15 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.render.Begin(screen)
 
-	for i := 0; i < g.entityManager.Size(); i++ {
-		entity, err := g.entityManager.GetEntity(i)
+	for i := 0; i < gs.entityManager.Size(); i++ {
+		entity, err := gs.entityManager.GetEntity(i)
 		if err != nil {
 			continue
 		}
 
 		// Draw sprite
 		if entity.AnimationID >= 0 {
-			animation := g.animationManager.GetAnimation(entity.AnimationID)
+			animation := gs.animationManager.GetAnimation(entity.AnimationID)
 			if animation.IsActive {
 				if entity.Body.Velocity.Y == 0 {
 					if entity.Body.Velocity.X < 0 {
