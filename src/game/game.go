@@ -6,6 +6,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"thanhfphan.com/bomberman/src/engine"
 	"thanhfphan.com/bomberman/src/engine/animation"
+	"thanhfphan.com/bomberman/src/engine/audio"
 )
 
 type Game struct {
@@ -20,6 +21,9 @@ type Game struct {
 	animationWalkRightID int
 	animationWalkBackID  int
 	animationWalkFrontID int
+
+	backgroundMusic *audio.Player
+	playBombSound   *audio.Player
 }
 
 func New(w, h int) *Game {
@@ -39,7 +43,7 @@ func (g *Game) LoadConfig(file string) error {
 	return nil
 }
 
-func (g *Game) playerMoving() {
+func (g *Game) handlePlayer() {
 	g.player.Body.Velocity.X = 0
 	g.player.Body.Velocity.Y = 0
 	if g.input.Left == engine.KeyStatePressed || g.input.Left == engine.KeyStateHeld {
@@ -53,6 +57,10 @@ func (g *Game) playerMoving() {
 	}
 	if g.input.Down == engine.KeyStatePressed || g.input.Down == engine.KeyStateHeld {
 		g.player.Body.Velocity.Y += engine.PlayerSpeed
+	}
+
+	if g.input.PlaceBomb == engine.KeyStatePressed {
+		audio.Play(g.playBombSound)
 	}
 }
 
@@ -74,7 +82,7 @@ func (g *Game) Update() error {
 
 	g.time.Update()
 	g.input.Update()
-	g.playerMoving()
+	g.handlePlayer()
 
 	g.animationManager.Update(g.time.Delta)
 	g.entityManager.Update(g.time.Delta)

@@ -13,6 +13,7 @@ func main() {
 	if err := game.Setup(); err != nil {
 		log.Fatalf("could not setup game: %v", err)
 	}
+	game.Init()
 	if err := game.LoadConfig("config.ini"); err != nil {
 		log.Fatalf("could not load config: %v", err)
 	}

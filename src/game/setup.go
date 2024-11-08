@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"thanhfphan.com/bomberman/assets"
+	"thanhfphan.com/bomberman/src/engine/audio"
 	"thanhfphan.com/bomberman/src/engine/spritesheet"
 )
 
@@ -57,6 +58,16 @@ func (g *Game) Setup() error {
 	g.animationWalkFrontID, err = g.animationManager.CreateAnimation(walkFrontID, true)
 	if err != nil {
 		return fmt.Errorf("could not add player walk down animation: %v", err)
+	}
+
+	// ********** Audio **********
+	g.backgroundMusic, err = audio.LoadWAV(assets.BackGroundMusic, true)
+	if err != nil {
+		return fmt.Errorf("could not load background music: %v", err)
+	}
+	g.playBombSound, err = audio.LoadWAV(assets.BomSetSound, false)
+	if err != nil {
+		return fmt.Errorf("could not load bomb set sound: %v", err)
 	}
 
 	return nil

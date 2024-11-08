@@ -21,3 +21,12 @@ var PlayerIdleFront []byte
 
 //go:embed character/idle-back.png
 var PlayerIdleBack []byte
+
+//go:embed audio/BG_MUSIC.wav
+var BackGroundMusic []byte
+
+//go:embed audio/BOM_SET.wav
+var BomSetSound []byte
+
+//go:embed audio/BOM_EXPLODE.wav
+var BomExplodeSound []byte
