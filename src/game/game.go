@@ -93,34 +93,28 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.render.Begin(screen)
 
-	// g.render.RenderQuad(screen, float32(g.player.Body.AABB.Position.X), float32(g.player.Body.AABB.Position.Y), 100, 100, color.White)
 	for i := 0; i < g.entityManager.Size(); i++ {
 		entity, err := g.entityManager.GetEntity(i)
 		if err != nil {
 			continue
 		}
-		if entity.AnimationID == -1 {
-			continue
-		}
-		animation, err := g.animationManager.GetAnimation(entity.AnimationID)
-		if err != nil {
-			continue
-		}
-		if !animation.IsActive {
-			continue
-		}
 
-		if entity.Body.Velocity.Y == 0 {
-			if entity.Body.Velocity.X < 0 {
-				animation.IsFlipped = true
-			} else if entity.Body.Velocity.X > 0 {
-				animation.IsFlipped = false
+		// Draw sprite
+		if entity.AnimationID >= 0 {
+			animation := g.animationManager.GetAnimation(entity.AnimationID)
+			if animation.IsActive {
+				if entity.Body.Velocity.Y == 0 {
+					if entity.Body.Velocity.X < 0 {
+						animation.IsFlipped = true
+					} else if entity.Body.Velocity.X > 0 {
+						animation.IsFlipped = false
+					}
+				}
+				aframe := animation.Definition.Frames[animation.CurrentFrameIndex]
+				animation.Definition.SpriteSheet.DrawFrame(screen, float64(aframe.Row), float64(aframe.Column), entity.Body.Position, animation.IsFlipped)
 			}
 		}
 
-		aframe := animation.Definition.Frames[animation.CurrentFrameIndex]
-
-		animation.Definition.SpriteSheet.DrawFrame(screen, float64(aframe.Row), float64(aframe.Column), entity.Body.AABB.Position, animation.IsFlipped)
 	}
 
 	g.render.End(screen)

@@ -30,7 +30,8 @@ func (em *EntityManager) CreateEntity() (*Entity, error) {
 	}
 
 	entity := &Entity{
-		Body: body,
+		Body:        body,
+		AnimationID: -1,
 	}
 	entity.ID = em.entites.Append(entity)
 

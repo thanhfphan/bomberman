@@ -56,7 +56,7 @@ func (b *BodyManager) Update(deltaTime float64) {
 			continue
 		}
 
-		body.AABB.Position.X += body.Velocity.X * deltaTime
-		body.AABB.Position.Y += body.Velocity.Y * deltaTime
+		body.Position.X += body.Velocity.X * deltaTime
+		body.Position.Y += body.Velocity.Y * deltaTime
 	}
 }

@@ -6,7 +6,7 @@ import (
 
 type Body struct {
 	ID       int
-	AABB     AABB
+	Position math.Vec2
 	Velocity math.Vec2
 
 	IsActive bool

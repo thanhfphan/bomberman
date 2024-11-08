@@ -46,6 +46,7 @@ func NewManager() *Manager {
 
 func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration float32, row uint8, column []uint8, frameCount uint8) int {
 	if frameCount > MaxFrame {
+		// Create definition only called when initializing the game, so this ok to panic
 		panic(fmt.Errorf("frame count exceeds maximum frame count"))
 	}
 
@@ -64,10 +65,11 @@ func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duratio
 	return m.definitions.Append(def)
 }
 
-func (m *Manager) CreateAnimation(definitionID int, doesLoop bool) (int, error) {
+func (m *Manager) CreateAnimation(definitionID int, doesLoop bool) int {
 	def, err := m.definitions.Get(definitionID)
 	if err != nil {
-		return -1, fmt.Errorf("could not find definition with id %d", definitionID)
+		// Create animation only called when initializing the game, so this ok to panic
+		panic(fmt.Errorf("could not find definition with id %d", definitionID))
 	}
 	animation := &Animation{
 		Definition:       def,
@@ -78,15 +80,16 @@ func (m *Manager) CreateAnimation(definitionID int, doesLoop bool) (int, error) 
 
 	id := m.animations.Append(animation)
 
-	return id, nil
+	return id
 }
 
 func (m *Manager) DestroyAnimation(index int) error {
 	return m.animations.Remove(index)
 }
 
-func (m *Manager) GetAnimation(index int) (*Animation, error) {
-	return m.animations.Get(index)
+func (m *Manager) GetAnimation(index int) *Animation {
+	animation, _ := m.animations.Get(index)
+	return animation
 }
 
 func (m *Manager) Update(deltaTime float64) {
