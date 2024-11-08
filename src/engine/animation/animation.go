@@ -44,7 +44,7 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration []float32, row []uint8, column []uint8, frameCount uint8) int {
+func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration float32, row uint8, column []uint8, frameCount uint8) int {
 	if frameCount > MaxFrame {
 		panic(fmt.Errorf("frame count exceeds maximum frame count"))
 	}
@@ -55,8 +55,8 @@ func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duratio
 	}
 	for i := uint8(0); i < frameCount; i++ {
 		def.Frames[i] = Frame{
-			Duration: duration[i],
-			Row:      row[i],
+			Duration: duration,
+			Row:      row,
 			Column:   column[i],
 		}
 	}
