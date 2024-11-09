@@ -1,6 +1,8 @@
 package dt
 
-import "errors"
+import (
+	"errors"
+)
 
 var ErrIndexOutOfRange = errors.New("index out of range")
 
@@ -26,7 +28,7 @@ func NewArrayList[T any](capacity int) *ArrayList[T] {
 func (list *ArrayList[T]) Append(item T) int {
 	var index int
 	if list.freeList.Size() > 0 {
-		index, _ = list.freeList.Pop()
+		index = list.freeList.Pop()
 	} else {
 		if list.size >= list.capacity {
 			list.capacity *= 2

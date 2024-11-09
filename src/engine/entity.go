@@ -1,9 +1,11 @@
 package engine
 
-import "thanhfphan.com/bomberman/src/engine/physics"
+import "github.com/hajimehoshi/ebiten/v2"
 
-type Entity struct {
-	ID          int
-	Body        *physics.Body
-	AnimationID int
+type Entity interface {
+	GetID() int
+	Update(deltaTime float64)
+	IsActive() bool
+	Render(screen *ebiten.Image)
+	Destroy()
 }

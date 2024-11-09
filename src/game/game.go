@@ -2,41 +2,101 @@ package game
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"thanhfphan.com/bomberman/assets"
 	"thanhfphan.com/bomberman/src/engine"
 	"thanhfphan.com/bomberman/src/engine/animation"
 	"thanhfphan.com/bomberman/src/engine/audio"
+	"thanhfphan.com/bomberman/src/engine/spritesheet"
 )
 
 type GlobalState struct {
 	time             *engine.TimeState
 	input            *engine.InputSate
-	entityManager    *engine.EntityManager
 	animationManager *animation.Manager
+	entityManager    *EntityManager
 }
+
+var (
+	backgroundMusic  *audio.Player
+	soundBombSet     *audio.Player
+	soundBombExplode *audio.Player
+
+	animationIdleID      int
+	animationWalkRightID int
+	animationWalkBackID  int
+	animationWalkFrontID int
+	animationBombID      int
+)
 
 var gs GlobalState
 
 func init() {
 	gs.time = engine.NewTimeState()
 	gs.input = engine.NewInputState()
-	gs.entityManager = engine.NewEntityManager()
+	gs.entityManager = NewEntityManager()
 	gs.animationManager = animation.NewManager()
+
+	// ********** Audio **********
+	var err error
+	backgroundMusic, err = audio.LoadWAV(assets.BackGroundMusic, true)
+	if err != nil {
+		panic(fmt.Errorf("could not load background music: %v", err))
+	}
+	soundBombSet, err = audio.LoadWAV(assets.BomSetSound, false)
+	if err != nil {
+		panic(fmt.Errorf("could not load bomb set sound: %v", err))
+	}
+	soundBombExplode, err = audio.LoadWAV(assets.BomExplodeSound, false)
+	if err != nil {
+		panic(fmt.Errorf("could not load bomb explode sound: %v", err))
+	}
+
+	// ********** Add player animations **********
+	// Walk right
+	ssPlayerWalkRight, err := spritesheet.NewSpriteSheet(assets.PlayerWalkRight, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create player sprite sheet: %v", err))
+	}
+	walkRightID := gs.animationManager.CreateDefinition(ssPlayerWalkRight, 0.1, []uint8{0, 0, 0, 0}, []uint8{0, 1, 2, 3}, 4)
+	animationWalkRightID = gs.animationManager.CreateAnimation(walkRightID, true)
+	// Idle
+	ssPlayerIdle, err := spritesheet.NewSpriteSheet(assets.PlayerIdleFront, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create player idle sprite sheet: %v", err))
+	}
+	idleID := gs.animationManager.CreateDefinition(ssPlayerIdle, 0, []uint8{0, 0, 0, 0}, []uint8{0}, 1)
+	animationIdleID = gs.animationManager.CreateAnimation(idleID, false)
+	// Walk up
+	ssPlayerWalkBack, err := spritesheet.NewSpriteSheet(assets.PlayerWalkBack, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create player walk up sprite sheet: %v", err))
+	}
+	walkBackID := gs.animationManager.CreateDefinition(ssPlayerWalkBack, 0.1, []uint8{0, 0, 0, 0}, []uint8{0, 1, 2, 3}, 4)
+	animationWalkBackID = gs.animationManager.CreateAnimation(walkBackID, true)
+	// Walk down
+	ssPlayerWalkFront, err := spritesheet.NewSpriteSheet(assets.PlayerWalkFront, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create player walk down sprite sheet: %v", err))
+	}
+	walkFrontID := gs.animationManager.CreateDefinition(ssPlayerWalkFront, 0.1, []uint8{0, 0, 0, 0}, []uint8{0, 1, 2, 3}, 4)
+	animationWalkFrontID = gs.animationManager.CreateAnimation(walkFrontID, true)
+
+	// ********** Add bomb animations **********
+	bombSprite, err := spritesheet.NewSpriteSheet(assets.BombSprite, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create bomb sprite sheet: %v", err))
+	}
+	bombDefID := gs.animationManager.CreateDefinition(bombSprite, 0.1, []uint8{0, 0, 0, 1, 1, 1, 2, 2, 2}, []uint8{0, 1, 2, 0, 1, 2, 0, 1, 2}, 9)
+	animationBombID = gs.animationManager.CreateAnimation(bombDefID, true)
+
 }
 
 type Game struct {
-	render *engine.RenderState
-
 	player *Player
-
-	animationIdleID      int
-	animationWalkRightID int
-	animationWalkBackID  int
-	animationWalkFrontID int
-
-	backgroundMusic *audio.Player
-	playBombSound   *audio.Player
+	render *engine.RenderState
 }
 
 func New(w, h int) *Game {
@@ -45,32 +105,14 @@ func New(w, h int) *Game {
 	}
 }
 
-func (g *Game) LoadConfig(file string) error {
-	if err := engine.LoadConfig(file); err != nil {
-		return fmt.Errorf("could not load config file: %v", err)
+func (g *Game) createBomb() {
+	bomb := &Bomb{
+		Countdown:   time.Duration(3) * time.Second,
+		PlacedAt:    time.Now(),
+		Position:    g.player.Position,
+		AnimationID: animationBombID,
 	}
-	return nil
-}
-
-func (g *Game) handlePlayer() {
-	g.player.Body.Velocity.X = 0
-	g.player.Body.Velocity.Y = 0
-	if gs.input.Left == engine.KeyStatePressed || gs.input.Left == engine.KeyStateHeld {
-		g.player.Body.Velocity.X -= engine.PlayerSpeed
-	}
-	if gs.input.Right == engine.KeyStatePressed || gs.input.Right == engine.KeyStateHeld {
-		g.player.Body.Velocity.X += engine.PlayerSpeed
-	}
-	if gs.input.Up == engine.KeyStatePressed || gs.input.Up == engine.KeyStateHeld {
-		g.player.Body.Velocity.Y -= engine.PlayerSpeed
-	}
-	if gs.input.Down == engine.KeyStatePressed || gs.input.Down == engine.KeyStateHeld {
-		g.player.Body.Velocity.Y += engine.PlayerSpeed
-	}
-
-	if gs.input.PlaceBomb == engine.KeyStatePressed {
-		audio.Play(g.playBombSound)
-	}
+	bomb.ID = gs.entityManager.Create(bomb)
 }
 
 func (g *Game) Update() error {
@@ -78,24 +120,26 @@ func (g *Game) Update() error {
 		return ebiten.Termination
 	}
 
-	playerv := g.player.Body.Velocity
-	if playerv.Y < 0 {
-		g.player.AnimationID = g.animationWalkBackID
-	} else if playerv.Y > 0 {
-		g.player.AnimationID = g.animationWalkFrontID
-	} else if playerv.X != 0 {
-		g.player.AnimationID = g.animationWalkRightID // Walk left will be flipped
-	} else {
-		g.player.AnimationID = g.animationIdleID
-	}
-
 	gs.time.Update()
 	gs.input.Update()
 
-	g.handlePlayer()
+	if gs.input.PlaceBomb == engine.KeyStatePressed {
+		audio.Play(soundBombSet)
+		g.createBomb()
+	}
 
 	gs.animationManager.Update(gs.time.Delta)
-	gs.entityManager.Update(gs.time.Delta)
+	for i := 0; i < gs.entityManager.Size(); i++ {
+		entity, err := gs.entityManager.GetEntity(i)
+		if err != nil {
+			continue
+		}
+		if !entity.IsActive() {
+			continue
+		}
+
+		entity.Update(gs.time.Delta)
+	}
 
 	return nil
 }
@@ -109,22 +153,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			continue
 		}
 
-		// Draw sprite
-		if entity.AnimationID >= 0 {
-			animation := gs.animationManager.GetAnimation(entity.AnimationID)
-			if animation.IsActive {
-				if entity.Body.Velocity.Y == 0 {
-					if entity.Body.Velocity.X < 0 {
-						animation.IsFlipped = true
-					} else if entity.Body.Velocity.X > 0 {
-						animation.IsFlipped = false
-					}
-				}
-				aframe := animation.Definition.Frames[animation.CurrentFrameIndex]
-				animation.Definition.SpriteSheet.DrawFrame(screen, float64(aframe.Row), float64(aframe.Column), entity.Body.Position, animation.IsFlipped)
-			}
-		}
-
+		entity.Render(screen)
 	}
 
 	g.render.End(screen)

@@ -28,7 +28,6 @@ type Animation struct {
 	CurrentFrameTime  float32
 	CurrentFrameIndex uint8
 	DoesLoop          bool
-	IsActive          bool
 	IsFlipped         bool
 }
 
@@ -44,7 +43,7 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration float32, row uint8, column []uint8, frameCount uint8) int {
+func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration float32, rows []uint8, column []uint8, frameCount uint8) int {
 	if frameCount > MaxFrame {
 		// Create definition only called when initializing the game, so this ok to panic
 		panic(fmt.Errorf("frame count exceeds maximum frame count"))
@@ -57,7 +56,7 @@ func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duratio
 	for i := uint8(0); i < frameCount; i++ {
 		def.Frames[i] = Frame{
 			Duration: duration,
-			Row:      row,
+			Row:      rows[i],
 			Column:   column[i],
 		}
 	}
@@ -74,7 +73,6 @@ func (m *Manager) CreateAnimation(definitionID int, doesLoop bool) int {
 	animation := &Animation{
 		Definition:       def,
 		DoesLoop:         doesLoop,
-		IsActive:         true,
 		CurrentFrameTime: def.Frames[0].Duration,
 	}
 
@@ -97,9 +95,6 @@ func (m *Manager) Update(deltaTime float64) {
 		animation, err := m.animations.Get(i)
 		if err != nil {
 			panic(fmt.Errorf("could not get animation: %v", err)) // Should never happen
-		}
-		if !animation.IsActive {
-			continue
 		}
 
 		animation.CurrentFrameTime -= float32(deltaTime)

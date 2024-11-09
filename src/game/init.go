@@ -5,5 +5,5 @@ import (
 )
 
 func (g *Game) Init() {
-	audio.Play(g.backgroundMusic)
+	audio.Play(backgroundMusic)
 }

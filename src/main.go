@@ -10,13 +10,10 @@ import (
 func main() {
 	width, height := 1088, 960
 	game := game.New(width, height)
-	if err := game.Setup(); err != nil {
+	if err := game.Setup("config.ini"); err != nil {
 		log.Fatalf("could not setup game: %v", err)
 	}
 	game.Init()
-	if err := game.LoadConfig("config.ini"); err != nil {
-		log.Fatalf("could not load config: %v", err)
-	}
 
 	ebiten.SetWindowTitle("Bomberman")
 	ebiten.SetWindowSize(width, height)

@@ -22,6 +22,9 @@ var PlayerIdleFront []byte
 //go:embed character/idle-back.png
 var PlayerIdleBack []byte
 
+//go:embed items/dynamite-pack.png
+var BombSprite []byte
+
 //go:embed audio/BG_MUSIC.wav
 var BackGroundMusic []byte
 

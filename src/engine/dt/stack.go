@@ -31,16 +31,16 @@ func (s *StackInt) Push(item int) {
 	s.size++
 }
 
-func (s *StackInt) Pop() (int, bool) {
+func (s *StackInt) Pop() int {
 	if s.size == 0 {
-		return 0, false
+		panic("stack is empty")
 	}
 
-	item := s.items[s.size]
-	s.items[s.size] = 0
+	item := s.items[s.size-1]
+	s.items[s.size-1] = -1
 	s.size--
 	s.lookup.Remove(item)
-	return item, true
+	return item
 }
 
 func (s *StackInt) Peek() (int, bool) {
@@ -48,7 +48,7 @@ func (s *StackInt) Peek() (int, bool) {
 		return 0, false
 	}
 
-	return s.items[s.size], true
+	return s.items[s.size-1], true
 }
 
 func (s *StackInt) Size() int {
