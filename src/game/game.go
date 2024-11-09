@@ -28,7 +28,9 @@ var (
 	animationWalkRightID int
 	animationWalkBackID  int
 	animationWalkFrontID int
-	animationBombID      int
+
+	bombDefID          int
+	bombExplosionDefID int
 )
 
 var gs GlobalState
@@ -55,33 +57,57 @@ func init() {
 	}
 
 	// ********** Add player animations **********
-	// Walk right
 	ssPlayerWalkRight, err := spritesheet.NewSpriteSheet(assets.PlayerWalkRight, 32, 32)
 	if err != nil {
 		panic(fmt.Errorf("could not create player sprite sheet: %v", err))
 	}
-	walkRightID := gs.animationManager.CreateDefinition(ssPlayerWalkRight, 0.1, []uint8{0, 0, 0, 0}, []uint8{0, 1, 2, 3}, 4)
+	// Walk right
+	walkRightID := gs.animationManager.CreateDefinition(
+		ssPlayerWalkRight,
+		0.1,
+		[]uint8{0, 0, 0, 0},
+		[]uint8{0, 1, 2, 3},
+		4,
+	)
 	animationWalkRightID = gs.animationManager.CreateAnimation(walkRightID, true)
 	// Idle
 	ssPlayerIdle, err := spritesheet.NewSpriteSheet(assets.PlayerIdleFront, 32, 32)
 	if err != nil {
 		panic(fmt.Errorf("could not create player idle sprite sheet: %v", err))
 	}
-	idleID := gs.animationManager.CreateDefinition(ssPlayerIdle, 0, []uint8{0, 0, 0, 0}, []uint8{0}, 1)
+	idleID := gs.animationManager.CreateDefinition(
+		ssPlayerIdle,
+		0.1,
+		[]uint8{0, 0, 0, 0},
+		[]uint8{0, 1, 2, 3},
+		4,
+	)
 	animationIdleID = gs.animationManager.CreateAnimation(idleID, false)
 	// Walk up
 	ssPlayerWalkBack, err := spritesheet.NewSpriteSheet(assets.PlayerWalkBack, 32, 32)
 	if err != nil {
 		panic(fmt.Errorf("could not create player walk up sprite sheet: %v", err))
 	}
-	walkBackID := gs.animationManager.CreateDefinition(ssPlayerWalkBack, 0.1, []uint8{0, 0, 0, 0}, []uint8{0, 1, 2, 3}, 4)
+	walkBackID := gs.animationManager.CreateDefinition(
+		ssPlayerWalkBack,
+		0.1,
+		[]uint8{0, 0, 0, 0},
+		[]uint8{0, 1, 2, 3},
+		4,
+	)
 	animationWalkBackID = gs.animationManager.CreateAnimation(walkBackID, true)
 	// Walk down
 	ssPlayerWalkFront, err := spritesheet.NewSpriteSheet(assets.PlayerWalkFront, 32, 32)
 	if err != nil {
 		panic(fmt.Errorf("could not create player walk down sprite sheet: %v", err))
 	}
-	walkFrontID := gs.animationManager.CreateDefinition(ssPlayerWalkFront, 0.1, []uint8{0, 0, 0, 0}, []uint8{0, 1, 2, 3}, 4)
+	walkFrontID := gs.animationManager.CreateDefinition(
+		ssPlayerWalkFront,
+		0.1,
+		[]uint8{0, 0, 0, 0},
+		[]uint8{0, 1, 2, 3},
+		4,
+	)
 	animationWalkFrontID = gs.animationManager.CreateAnimation(walkFrontID, true)
 
 	// ********** Add bomb animations **********
@@ -89,9 +115,24 @@ func init() {
 	if err != nil {
 		panic(fmt.Errorf("could not create bomb sprite sheet: %v", err))
 	}
-	bombDefID := gs.animationManager.CreateDefinition(bombSprite, 0.1, []uint8{0, 0, 0, 1, 1, 1, 2, 2, 2}, []uint8{0, 1, 2, 0, 1, 2, 0, 1, 2}, 9)
-	animationBombID = gs.animationManager.CreateAnimation(bombDefID, true)
-
+	bombDefID = gs.animationManager.CreateDefinition(
+		bombSprite,
+		0.1,
+		[]uint8{0, 0, 0, 1, 1, 1, 2, 2, 2},
+		[]uint8{0, 1, 2, 0, 1, 2, 0, 1, 2},
+		9,
+	)
+	bombExplosion, err := spritesheet.NewSpriteSheet(assets.BombExplosion, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create bomb explosion sprite sheet: %v", err))
+	}
+	bombExplosionDefID = gs.animationManager.CreateDefinition(
+		bombExplosion,
+		0.1,
+		[]uint8{0, 0, 0, 1, 1, 1},
+		[]uint8{0, 1, 2, 0, 1, 2},
+		6,
+	)
 }
 
 type Game struct {
@@ -107,10 +148,11 @@ func New(w, h int) *Game {
 
 func (g *Game) createBomb() {
 	bomb := &Bomb{
-		Countdown:   time.Duration(3) * time.Second,
-		PlacedAt:    time.Now(),
-		Position:    g.player.Position,
-		AnimationID: animationBombID,
+		Countdown:          time.Duration(3) * time.Second,
+		PlacedAt:           time.Now(),
+		Position:           g.player.Position,
+		AnimationID:        gs.animationManager.CreateAnimation(bombDefID, true),
+		AnimationExploseID: gs.animationManager.CreateAnimation(bombExplosionDefID, false),
 	}
 	bomb.ID = gs.entityManager.Create(bomb)
 }

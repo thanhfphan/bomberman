@@ -31,6 +31,11 @@ type Animation struct {
 	IsFlipped         bool
 }
 
+func (a *Animation) Reset() {
+	a.CurrentFrameTime = a.Definition.Frames[0].Duration
+	a.CurrentFrameIndex = 0
+}
+
 type Manager struct {
 	definitions *dt.ArrayList[*Definition]
 	animations  *dt.ArrayList[*Animation]
@@ -44,6 +49,9 @@ func NewManager() *Manager {
 }
 
 func (m *Manager) CreateDefinition(spriteSheet *spritesheet.SpriteSheet, duration float32, rows []uint8, column []uint8, frameCount uint8) int {
+	if frameCount <= 0 {
+		panic(fmt.Errorf("frame count must be greater than 0"))
+	}
 	if frameCount > MaxFrame {
 		// Create definition only called when initializing the game, so this ok to panic
 		panic(fmt.Errorf("frame count exceeds maximum frame count"))
@@ -93,6 +101,9 @@ func (m *Manager) GetAnimation(index int) *Animation {
 func (m *Manager) Update(deltaTime float64) {
 	for i := 0; i < m.animations.Size(); i++ {
 		animation, err := m.animations.Get(i)
+		if err == dt.ErrIndexOutOfRange {
+			continue
+		}
 		if err != nil {
 			panic(fmt.Errorf("could not get animation: %v", err)) // Should never happen
 		}

@@ -9,11 +9,13 @@ import (
 )
 
 type Bomb struct {
-	ID          int
-	Countdown   time.Duration
-	PlacedAt    time.Time
-	Position    math.Vec2
-	AnimationID int
+	ID                 int
+	Countdown          time.Duration
+	PlacedAt           time.Time
+	Position           math.Vec2
+	AnimationID        int
+	AnimationExploseID int
+	Exploded           bool
 
 	Deleted bool
 }
@@ -27,9 +29,21 @@ func (b *Bomb) Update(deltaTime float64) {
 		return
 	}
 
-	if time.Since(b.PlacedAt) >= b.Countdown {
-		audio.Play(soundBombExplode)
-		gs.entityManager.Remove(b)
+	if !b.Exploded {
+		if time.Since(b.PlacedAt) >= b.Countdown {
+			audio.Play(soundBombExplode)
+			b.Exploded = true
+			gs.animationManager.DestroyAnimation(b.AnimationID)
+			b.AnimationID = b.AnimationExploseID
+			animation := gs.animationManager.GetAnimation(b.AnimationID)
+			animation.Reset()
+		}
+	} else {
+		animation := gs.animationManager.GetAnimation(b.AnimationID)
+		if animation.CurrentFrameIndex >= animation.Definition.FrameCount-1 {
+			gs.animationManager.DestroyAnimation(b.AnimationID)
+			gs.entityManager.Remove(b)
+		}
 	}
 }
 

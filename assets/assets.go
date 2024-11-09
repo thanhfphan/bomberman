@@ -33,3 +33,6 @@ var BomSetSound []byte
 
 //go:embed audio/BOM_EXPLODE.wav
 var BomExplodeSound []byte
+
+//go:embed fxs/explosion.png
+var BombExplosion []byte
