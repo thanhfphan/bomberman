@@ -20,6 +20,19 @@ type Bomb struct {
 	Deleted bool
 }
 
+func NewBomb(position math.Vec2) *Bomb {
+	bomb := &Bomb{
+		Position:           position,
+		Countdown:          time.Duration(3) * time.Second,
+		PlacedAt:           time.Now(),
+		AnimationID:        global.animation.CreateAnimation(bombDefID, true),
+		AnimationExploseID: global.animation.CreateAnimation(bombExplosionDefID, false),
+	}
+	bomb.ID = global.entity.Create(bomb)
+
+	return bomb
+}
+
 func (b *Bomb) GetID() int {
 	return b.ID
 }
@@ -55,13 +68,8 @@ func (b *Bomb) Render(screen *ebiten.Image) {
 	if !b.IsActive() {
 		return
 	}
-	if b.AnimationID < 0 {
-		return
-	}
+
 	animation := global.animation.GetAnimation(b.AnimationID)
-	if animation == nil {
-		return
-	}
 	aframe := animation.Definition.Frames[animation.CurrentFrameIndex]
 	animation.Definition.SpriteSheet.DrawFrame(screen, float64(aframe.Row), float64(aframe.Column), b.Position, animation.IsFlipped)
 }

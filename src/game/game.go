@@ -1,8 +1,6 @@
 package game
 
 import (
-	"time"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"thanhfphan.com/bomberman/src/engine"
 	"thanhfphan.com/bomberman/src/engine/animation"
@@ -37,17 +35,6 @@ func New(w, h int) *Game {
 	}
 }
 
-func (g *Game) createBomb() {
-	bomb := &Bomb{
-		Countdown:          time.Duration(3) * time.Second,
-		PlacedAt:           time.Now(),
-		Position:           g.player.Position,
-		AnimationID:        global.animation.CreateAnimation(bombDefID, true),
-		AnimationExploseID: global.animation.CreateAnimation(bombExplosionDefID, false),
-	}
-	bomb.ID = global.entity.Create(bomb)
-}
-
 func (g *Game) Update() error {
 	if global.input.Escape == engine.KeyStatePressed {
 		return ebiten.Termination
@@ -58,7 +45,7 @@ func (g *Game) Update() error {
 
 	if global.input.PlaceBomb == engine.KeyStatePressed {
 		audio.Play(soundBombSet)
-		g.createBomb()
+		NewBomb(g.player.Position)
 	}
 
 	global.animation.Update(global.time.Delta)
