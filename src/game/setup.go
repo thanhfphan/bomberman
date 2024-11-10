@@ -13,6 +13,7 @@ func (g *Game) Setup(configFile string) error {
 	}
 
 	initAssets()
+	global.assetKeeper.Load()
 
 	g.player = NewPlayer(
 		engine.PlayerSpeed,

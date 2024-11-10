@@ -8,17 +8,16 @@ import (
 )
 
 func main() {
-	width, height := 1088, 960
-	game := game.New(width, height)
-	if err := game.Setup("config.ini"); err != nil {
+	g := game.New()
+	if err := g.Setup("config.ini"); err != nil {
 		log.Fatalf("could not setup game: %v", err)
 	}
-	game.Init()
+	g.Init()
 
 	ebiten.SetWindowTitle("Bomberman")
-	ebiten.SetWindowSize(width, height)
+	ebiten.SetWindowSize(game.WindowWidth, game.WindowHeight)
 
-	if err := ebiten.RunGame(game); err != nil && err != ebiten.Termination {
+	if err := ebiten.RunGame(g); err != nil && err != ebiten.Termination {
 		log.Fatal(err)
 	}
 }

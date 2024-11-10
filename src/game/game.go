@@ -8,10 +8,11 @@ import (
 )
 
 type GlobalState struct {
-	time      *engine.TimeState
-	input     *engine.InputSate
-	animation *animation.Manager
-	entity    *EntityManager
+	time        *engine.TimeState
+	input       *engine.InputSate
+	animation   *animation.Manager
+	entity      *EntityManager
+	assetKeeper *AssetKeeper
 }
 
 var global GlobalState
@@ -21,17 +22,30 @@ func init() {
 	global.input = engine.NewInputState()
 	global.entity = NewEntityManager()
 	global.animation = animation.NewManager()
-
+	global.assetKeeper = NewAssetKeeper()
 }
 
+const (
+	TileSize      = 32
+	LogicalWidth  = 544
+	LogicalHeight = 480
+	ScaleFactor   = 2
+	WindowWidth   = LogicalWidth * ScaleFactor
+	WindowHeight  = LogicalHeight * ScaleFactor
+	GridWidth     = LogicalWidth / TileSize  // 17 tiles
+	GridHeight    = LogicalHeight / TileSize // 15 tiles
+)
+
 type Game struct {
+	grid   *Grid
 	player *Player
 	render *engine.RenderState
 }
 
-func New(w, h int) *Game {
+func New() *Game {
 	return &Game{
-		render: engine.NewRenderState(w, h),
+		grid:   NewGrid(GridWidth, GridHeight),
+		render: engine.NewRenderState(WindowWidth, WindowHeight),
 	}
 }
 
@@ -67,6 +81,8 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.render.Begin(screen)
 
+	g.grid.Render(screen)
+
 	for i := 0; i < global.entity.Size(); i++ {
 		entity, err := global.entity.GetEntity(i)
 		if err != nil {
@@ -80,5 +96,5 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 544, 480
+	return LogicalWidth, LogicalHeight
 }

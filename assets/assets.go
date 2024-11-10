@@ -36,3 +36,6 @@ var BomExplodeSound []byte
 
 //go:embed fxs/explosion.png
 var BombExplosion []byte
+
+//go:embed terrain/grass.png
+var TerrainGrass []byte

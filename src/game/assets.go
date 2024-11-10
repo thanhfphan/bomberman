@@ -13,6 +13,8 @@ var (
 	soundBombSet     *audio.Player
 	soundBombExplode *audio.Player
 
+	grassSprite *spritesheet.SpriteSheet
+
 	animationIdleRightID int
 	animationIdleBackID  int
 	animationIdleFrontID int
@@ -146,4 +148,11 @@ func initAssets() {
 		[]uint8{0, 1, 2, 0, 1, 2},
 		6,
 	)
+
+	// ********** Map **********
+	grassSprite, err = spritesheet.NewSpriteSheet(assets.TerrainGrass, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create grass sprite sheet: %v", err))
+	}
+
 }
