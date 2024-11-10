@@ -27,16 +27,16 @@ func (p *Player) Update(deltaTime float64) {
 
 	p.Velocity.X = 0
 	p.Velocity.Y = 0
-	if gs.input.Left == engine.KeyStatePressed || gs.input.Left == engine.KeyStateHeld {
+	if global.input.Left == engine.KeyStatePressed || global.input.Left == engine.KeyStateHeld {
 		p.Velocity.X -= p.Speed
 	}
-	if gs.input.Right == engine.KeyStatePressed || gs.input.Right == engine.KeyStateHeld {
+	if global.input.Right == engine.KeyStatePressed || global.input.Right == engine.KeyStateHeld {
 		p.Velocity.X += p.Speed
 	}
-	if gs.input.Up == engine.KeyStatePressed || gs.input.Up == engine.KeyStateHeld {
+	if global.input.Up == engine.KeyStatePressed || global.input.Up == engine.KeyStateHeld {
 		p.Velocity.Y -= p.Speed
 	}
-	if gs.input.Down == engine.KeyStatePressed || gs.input.Down == engine.KeyStateHeld {
+	if global.input.Down == engine.KeyStatePressed || global.input.Down == engine.KeyStateHeld {
 		p.Velocity.Y += p.Speed
 	}
 
@@ -65,7 +65,7 @@ func (p *Player) Render(screen *ebiten.Image) {
 	if p.AnimationID < 0 {
 		return
 	}
-	animation := gs.animationManager.GetAnimation(p.AnimationID)
+	animation := global.animation.GetAnimation(p.AnimationID)
 	if animation == nil {
 		return
 	}

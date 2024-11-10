@@ -33,16 +33,16 @@ func (b *Bomb) Update(deltaTime float64) {
 		if time.Since(b.PlacedAt) >= b.Countdown {
 			audio.Play(soundBombExplode)
 			b.Exploded = true
-			gs.animationManager.DestroyAnimation(b.AnimationID)
+			global.animation.DestroyAnimation(b.AnimationID)
 			b.AnimationID = b.AnimationExploseID
-			animation := gs.animationManager.GetAnimation(b.AnimationID)
+			animation := global.animation.GetAnimation(b.AnimationID)
 			animation.Reset()
 		}
 	} else {
-		animation := gs.animationManager.GetAnimation(b.AnimationID)
+		animation := global.animation.GetAnimation(b.AnimationID)
 		if animation.CurrentFrameIndex >= animation.Definition.FrameCount-1 {
-			gs.animationManager.DestroyAnimation(b.AnimationID)
-			gs.entityManager.Remove(b)
+			global.animation.DestroyAnimation(b.AnimationID)
+			global.entity.Remove(b)
 		}
 	}
 }
@@ -58,7 +58,7 @@ func (b *Bomb) Render(screen *ebiten.Image) {
 	if b.AnimationID < 0 {
 		return
 	}
-	animation := gs.animationManager.GetAnimation(b.AnimationID)
+	animation := global.animation.GetAnimation(b.AnimationID)
 	if animation == nil {
 		return
 	}

@@ -12,6 +12,8 @@ func (g *Game) Setup(configFile string) error {
 		return fmt.Errorf("could not load config file: %w", err)
 	}
 
+	initAssets()
+
 	player := &Player{
 		Speed: engine.PlayerSpeed,
 		Position: math.Vec2{
@@ -19,7 +21,7 @@ func (g *Game) Setup(configFile string) error {
 			Y: 200,
 		},
 	}
-	player.ID = gs.entityManager.Create(player)
+	player.ID = global.entity.Create(player)
 	g.player = player
 
 	return nil
