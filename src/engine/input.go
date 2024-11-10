@@ -5,7 +5,8 @@ import "github.com/hajimehoshi/ebiten/v2"
 type InputKey int
 
 const (
-	InputKeyLeft InputKey = iota
+	InputKeyNone InputKey = iota
+	InputKeyLeft
 	InputKeyRight
 	InputKeyUp
 	InputKeyDown

@@ -14,15 +14,10 @@ func (g *Game) Setup(configFile string) error {
 
 	initAssets()
 
-	player := &Player{
-		Speed: engine.PlayerSpeed,
-		Position: math.Vec2{
-			X: 300,
-			Y: 200,
-		},
-	}
-	player.ID = global.entity.Create(player)
-	g.player = player
+	g.player = NewPlayer(
+		engine.PlayerSpeed,
+		math.Vec2{X: 300, Y: 200},
+	)
 
 	return nil
 }

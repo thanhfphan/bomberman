@@ -13,7 +13,10 @@ var (
 	soundBombSet     *audio.Player
 	soundBombExplode *audio.Player
 
-	animationIdleID      int
+	animationIdleRightID int
+	animationIdleBackID  int
+	animationIdleFrontID int
+
 	animationWalkRightID int
 	animationWalkBackID  int
 	animationWalkFrontID int
@@ -52,19 +55,47 @@ func initAssets() {
 		4,
 	)
 	animationWalkRightID = global.animation.CreateAnimation(walkRightID, true)
-	// Idle
-	ssPlayerIdle, err := spritesheet.NewSpriteSheet(assets.PlayerIdleFront, 32, 32)
+	// Idle front
+	idleFront, err := spritesheet.NewSpriteSheet(assets.PlayerIdleFront, 32, 32)
 	if err != nil {
 		panic(fmt.Errorf("could not create player idle sprite sheet: %v", err))
 	}
-	idleID := global.animation.CreateDefinition(
-		ssPlayerIdle,
-		0.1,
-		[]uint8{0, 0, 0, 0},
-		[]uint8{0, 1, 2, 3},
-		4,
-	)
-	animationIdleID = global.animation.CreateAnimation(idleID, false)
+	animationIdleFrontID = global.animation.CreateAnimation(
+		global.animation.CreateDefinition(
+			idleFront,
+			0.3,
+			[]uint8{0, 0, 0, 0},
+			[]uint8{0, 1, 2, 3},
+			4,
+		),
+		true)
+	// Idle right
+	idleRight, err := spritesheet.NewSpriteSheet(assets.PlayerIdleRight, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create player idle sprite sheet: %v", err))
+	}
+	animationIdleRightID = global.animation.CreateAnimation(
+		global.animation.CreateDefinition(
+			idleRight,
+			0.3,
+			[]uint8{0, 0, 0, 0},
+			[]uint8{0, 1, 2, 3},
+			4,
+		),
+		true)
+	idleBack, err := spritesheet.NewSpriteSheet(assets.PlayerIdleBack, 32, 32)
+	if err != nil {
+		panic(fmt.Errorf("could not create player idle sprite sheet: %v", err))
+	}
+	animationIdleBackID = global.animation.CreateAnimation(
+		global.animation.CreateDefinition(
+			idleBack,
+			0.3,
+			[]uint8{0, 0, 0, 0},
+			[]uint8{0, 1, 2, 3},
+			4,
+		),
+		true)
 	// Walk up
 	ssPlayerWalkBack, err := spritesheet.NewSpriteSheet(assets.PlayerWalkBack, 32, 32)
 	if err != nil {
