@@ -22,7 +22,11 @@ type Bomb struct {
 
 func NewBomb(position math.Vec2) *Bomb {
 	bomb := &Bomb{
-		Position:           position,
+		// set to middle of the grid
+		Position: math.Vec2{
+			X: float64(int(position.X/TileSize)*TileSize + TileSize/2),
+			Y: float64(int(position.Y/TileSize)*TileSize + TileSize/2),
+		},
 		Countdown:          time.Duration(3) * time.Second,
 		PlacedAt:           time.Now(),
 		AnimationID:        global.animation.CreateAnimation(bombDefID, true),

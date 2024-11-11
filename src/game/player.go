@@ -42,10 +42,6 @@ func (p *Player) GetID() int {
 	return p.ID
 }
 
-func (p *Player) isKeyPressed(key engine.KeyState) bool {
-	return key == engine.KeyStatePressed || key == engine.KeyStateHeld
-}
-
 func (p *Player) Update(deltaTime float64) {
 	if !p.IsActive() {
 		return
@@ -77,6 +73,15 @@ func (p *Player) Update(deltaTime float64) {
 
 	p.Position.X += p.Velocity.X * deltaTime
 	p.Position.Y += p.Velocity.Y * deltaTime
+
+	snapThreshold := BaseSnapThreshold
+	if p.isMovingFast() {
+		snapThreshold = HighSpeedSnapThreshold
+	}
+
+	if p.isNearTileCenter(p.Position, snapThreshold) && p.State == PlayerStateIdle {
+		p.snapToTileCenter()
+	}
 }
 
 func (p *Player) IsActive() bool {
@@ -124,4 +129,27 @@ func (p *Player) Render(screen *ebiten.Image) {
 
 func (p *Player) Destroy() {
 	p.Deleted = true
+}
+
+func (p *Player) isKeyPressed(key engine.KeyState) bool {
+	return key == engine.KeyStatePressed || key == engine.KeyStateHeld
+}
+
+func (p *Player) isNearTileCenter(pos math.Vec2, threshold float64) bool {
+	centerX := float64(int(pos.X/TileSize)*TileSize + TileSize/2)
+	centerY := float64(int(pos.Y/TileSize)*TileSize + TileSize/2)
+
+	dx := math.Abs(pos.X - centerX)
+	dy := math.Abs(pos.Y - centerY)
+
+	return dx <= threshold && dy <= threshold
+}
+
+func (p *Player) snapToTileCenter() {
+	p.Position.X = float64(int(p.Position.X/TileSize)*TileSize + TileSize/2)
+	p.Position.Y = float64(int(p.Position.Y/TileSize)*TileSize + TileSize/2)
+}
+
+func (p *Player) isMovingFast() bool {
+	return math.Abs(p.Velocity.X) > HighSpeedThreshold || math.Abs(p.Velocity.Y) > HighSpeedThreshold
 }

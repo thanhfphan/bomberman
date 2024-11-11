@@ -34,6 +34,11 @@ const (
 	WindowHeight  = LogicalHeight * ScaleFactor
 	GridWidth     = LogicalWidth / TileSize  // 17 tiles
 	GridHeight    = LogicalHeight / TileSize // 15 tiles
+	//A good SnapThreshold typically ranges between 2% to 10% of the TileSize
+	// Medium Threshold (5%) 0.05×32=1.6≈2 pixels
+	BaseSnapThreshold      = float64(2) // 5% of TileSize
+	HighSpeedSnapThreshold = float64(4) // 10-15% of TileSize
+	HighSpeedThreshold     = float64(8) // 25% of TileSize
 )
 
 type Game struct {
