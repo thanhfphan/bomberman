@@ -39,3 +39,12 @@ var BombExplosion []byte
 
 //go:embed terrain/grass.png
 var TerrainGrass []byte
+
+//go:embed enemies/bat/fly-persp-right.png
+var BatFlyRight []byte
+
+//go:embed enemies/bat/fly-front.png
+var BatFlyFront []byte
+
+//go:embed enemies/bat/fly-back.png
+var BatFlyBack []byte

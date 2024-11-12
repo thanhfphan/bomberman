@@ -9,7 +9,7 @@ import (
 )
 
 type Bomb struct {
-	ID                 int
+	EntityID           int
 	Countdown          time.Duration
 	PlacedAt           time.Time
 	Position           math.Vec2
@@ -32,13 +32,13 @@ func NewBomb(position math.Vec2) *Bomb {
 		AnimationID:        global.animation.CreateAnimation(bombDefID, true),
 		AnimationExploseID: global.animation.CreateAnimation(bombExplosionDefID, false),
 	}
-	bomb.ID = global.entity.Create(bomb)
+	bomb.EntityID = global.entity.Create(bomb)
 
 	return bomb
 }
 
 func (b *Bomb) GetID() int {
-	return b.ID
+	return b.EntityID
 }
 
 func (b *Bomb) Update(deltaTime float64) {

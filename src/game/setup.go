@@ -12,13 +12,17 @@ func (g *Game) Setup(configFile string) error {
 		return fmt.Errorf("could not load config file: %w", err)
 	}
 
-	initAssets()
-	global.assetKeeper.Load()
+	if err := global.assetKeeper.Load(); err != nil {
+		return fmt.Errorf("could not load assets: %w", err)
+	}
 
 	g.player = NewPlayer(
 		engine.PlayerSpeed,
 		math.Vec2{X: 300, Y: 200},
 	)
+
+	// Create a new bat for testing
+	NewBat(math.Vec2{X: 100, Y: 100})
 
 	return nil
 }

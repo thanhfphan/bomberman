@@ -15,7 +15,7 @@ const (
 )
 
 type Player struct {
-	ID               int
+	EntityID         int
 	Speed            float64
 	Velocity         math.Vec2
 	Position         math.Vec2
@@ -34,12 +34,12 @@ func NewPlayer(speed float64, position math.Vec2) *Player {
 		State:       PlayerStateIdle,
 		AnimationID: animationIdleFrontID,
 	}
-	player.ID = global.entity.Create(player)
+	player.EntityID = global.entity.Create(player)
 	return player
 }
 
 func (p *Player) GetID() int {
-	return p.ID
+	return p.EntityID
 }
 
 func (p *Player) Update(deltaTime float64) {
